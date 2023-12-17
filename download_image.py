@@ -9,6 +9,7 @@ import psycopg2
 import json
 from io import BytesIO
 from PIL import Image
+#PostgresSQL veritabanına bağlantının gerçekleştirilmesi
 #%%
 db_connection = psycopg2.connect(
     host="localhost",
@@ -27,34 +28,35 @@ driver = webdriver.Chrome()
 url = 'https://www.asos.com/women/shirts/cat/?cid=15200'
 driver.get(url)
 
+#Url'de ki resimlerin doğru bir şekilde yüklenmesi
 wait = WebDriverWait(driver, 10)
 wait.until(EC.presence_of_element_located((By.TAG_NAME, 'img')))
 
-# Ürün öğelerini bulma
+# Class ismi 'gallery-image' olan ürünlerin bulunması
 product_elements = driver.find_elements(By.CLASS_NAME, 'gallery-image')
 
 for product_element in product_elements:
     
-    #product_page = driver.current_url
-    product_element.click()
     
-    # Yeni sayfa yüklenene kadar bekleme
+    #Tekrar tıklama işleminin doğru bi şekilde yapılabilmesi için ürünlerin yüklenmesi
     try:
         wait.until(EC.presence_of_element_located((By.XPATH, "//img[@class='gallery-image']")))
     except TimeoutException:
         print("Beklenen öğeler bulunamadı.")
     
-    #if product_page != driver.current_url:
-        #continue 
-    script4="return window.asos.pdp.config.product.variants[0].colour"
-    img_colour= driver.execute_script(script4)
     
-    script = "return window.asos.pdp.config.product.id"
-    product_id = driver.execute_script(script)
-    script2 = "return window.asos.pdp.config.product.gender"
-    gender=driver.execute_script(script2)
-    script3="return window.asos.pdp.config.product.productType.name"
-    product_type=driver.execute_script(script3)
+    product_element.click()
+    
+    #gerekli özelliklerin çekilmesi
+    script_colour="return window.asos.pdp.config.product.variants[0].colour"
+    img_colour= driver.execute_script(script_colour)
+    
+    script_id = "return window.asos.pdp.config.product.id"
+    product_id = driver.execute_script(script_id)
+    script_gender = "return window.asos.pdp.config.product.gender"
+    gender=driver.execute_script(script_gender)
+    script_type="return window.asos.pdp.config.product.productType.name"
+    product_type=driver.execute_script(script_type)
     img_img = driver.find_element(By.XPATH, "//img[@class='gallery-image']")
     
     screenshot = img_img.screenshot_as_png
@@ -81,8 +83,7 @@ for product_element in product_elements:
     
     # Önceki sayfaya dönme
     driver.back()
-    #driver.refresh()
-    # Yeni ürünlerin yüklenmesini beklemek için kısa bir süre bekleme
+    # Yeni ürünlerin yüklenmesini bekleme
     time.sleep(2)
 
 # Bağlantıları kapatma
